@@ -1,25 +1,51 @@
-## Local HTTPS
+## Application Configuration
 
-`SentinelEHS.Api` uses HTTPS for local development.
+Sentinel EHS uses the standard ASP.NET Core configuration system.
 
-The local HTTP and HTTPS addresses are defined in:
+Shared non-sensitive application defaults are stored in:
 
-`SentinelEHS.Api/Properties/launchSettings.json`
+`SentinelEHS.Api/appsettings.json`
 
-The assigned port numbers may differ between development environments.
+Environment-specific non-sensitive overrides may be stored in files following the standard ASP.NET Core convention:
 
-When the API starts successfully, the console displays the addresses on which the application is listening.
+`appsettings.{Environment}.json`
 
-Developers should use the HTTPS address when accessing API endpoints and OpenAPI documentation.
+For local development, Sentinel currently uses:
 
-The generated OpenAPI document is available in the Development environment at:
+`SentinelEHS.Api/appsettings.Development.json`
 
-`https://localhost:{https-port}/openapi/v1.json`
+The local Visual Studio launch profile configures the application to run using the `Development` environment.
 
-The project uses the ASP.NET Core development certificate for local HTTPS. This certificate is intended only for local development and must not be used as a production certificate.
+Configuration providers are layered. Environment-specific configuration can therefore override matching values from the base configuration.
 
-No development certificate private keys, passwords, production certificates, or other secrets may be committed to the repository.
+### Configuration and Secrets
 
-If the browser reports that the local HTTPS certificate is untrusted, the developer should verify or renew the ASP.NET Core development certificate using the official .NET development-certificate tooling.
+Committed application settings must contain only non-sensitive configuration.
 
-Production HTTPS, TLS termination, certificate renewal, and Azure hostname configuration are outside the scope of local development setup and will be defined as part of the deployment architecture.
+The following must not be committed to `appsettings.json`, environment-specific settings files, or other repository files:
+
+- Passwords
+- API keys
+- OAuth or application client secrets
+- Access or refresh tokens
+- Certificate private keys
+- Production database credentials
+- Storage access keys
+
+Local development secrets will use an appropriate local secret mechanism.
+
+Deployed environments will obtain secrets through approved environment configuration and secret-management services such as Azure Key Vault where appropriate.
+
+### Environments
+
+Sentinel EHS uses the standard ASP.NET Core environment model.
+
+The expected environments are:
+
+- `Development` for local developer execution.
+- `Staging` for pre-production validation when provisioned.
+- `Production` for the live application when provisioned.
+
+Environment-specific files should only be introduced when an environment has genuine configuration differences. Empty or speculative environment files should not be created merely to mirror the environment list.
+
+Application source code must not depend on developer names, workstation names, or other machine-specific identifiers to determine environment behaviour.
